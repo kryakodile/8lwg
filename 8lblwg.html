@@ -1,23 +1,23 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Rock Paper Scissors Game</title> 
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script> 
-    <script> 
-        window.onload = async function() { 
-            if (window.ethereum) { 
-                window.web3 = new Web3(window.ethereum); 
-                await window.ethereum.enable(); 
-            } else if (window.web3) { 
-                window.web3 = new Web3(window.web3.currentProvider); 
-            } else { 
-                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!'); 
-                return; 
-            } 
- 
-            const contractAddress = '0x9680778429290C1800F4A424070A04A805f2b649'; 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script>
+    <script>
+        window.onload = async function() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                await window.ethereum.enable();
+            } else if (window.web3) {
+                window.web3 = new Web3(window.web3.currentProvider);
+            } else {
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+                return;
+            }
+
+            const contractAddress = '0x9680778429290C1800F4A424070A04A805f2b649';
             const abi = [
     {
         "inputs": [
@@ -136,24 +136,94 @@
         "stateMutability": "view",
         "type": "function"
     }
-]; 
- 
-            const contract = new web3.eth.Contract(abi, contractAddress); 
- 
-            // Пример вызова метода смарт-контракта 
-            document.getElementById('openRoomButton').onclick = async function() { 
-                const roomId = parseInt(document.getElementById('roomIdInput').value); 
-                await contract.methods.roomOpen(roomId).send({from: web3.eth.defaultAccount}); 
-                alert('Room opened successfully!'); 
-            }; 
-        }; 
-    </script> 
-</head> 
-<body> 
-    <h1>Rock Paper Scissors Game</h1> 
-    <label for="roomIdInput">Room ID:</label> 
-    <input type="text" id="roomIdInput" /> 
-    <button id="openRoomButton">Open Room</button> 
-    <!-- Добавьте другие элементы управления и логику для взаимодействия с контрактом --> 
-</body> 
+];
+
+            const contract = new web3.eth.Contract(abi, contractAddress);
+
+            // Функция для открытия комнаты
+            document.getElementById('openRoomButton').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                await contract.methods.roomOpen(roomId).send({from: web3.eth.defaultAccount});
+                alert('Room opened successfully!');
+            };
+
+            // Функция для присоединения к комнате
+            document.getElementById('joinRoomButton').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                await contract.methods.joinPlayer(roomId).send({from: web3.eth.defaultAccount});
+                alert('You joined the room successfully!');
+            };
+
+            // Функция для отправки выбора первого игрока
+            document.getElementById('move1Button').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                const hash1 = web3.utils.keccak256(document.getElementById('move1Input').value);
+                await contract.methods.movePlayer1(roomId, hash1).send({from: web3.eth.defaultAccount});
+                alert('Your move has been sent successfully!');
+            };
+
+            // Функция для отправки выбора второго игрока
+            document.getElementById('move2Button').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                const hash2 = web3.utils.keccak256(document.getElementById('move2Input').value);
+                await contract.methods.movePlayer2(roomId, hash2).send({from: web3.eth.defaultAccount});
+                alert('Your move has been sent successfully!');
+            };
+
+            // Функция для расшифровки выбора первого игрока
+            document.getElementById('decode1Button').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                const seed1 = document.getElementById('decode1Input').value;
+                await contract.methods.decodeHash1(roomId, seed1).send({from: web3.eth.defaultAccount});
+            };
+
+            // Функция для расшифровки выбора второго игрока
+            document.getElementById('decode2Button').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                const seed2 = document.getElementById('decode2Input').value;
+                await contract.methods.decodeHash2(roomId, seed2).send({from: web3.eth.defaultAccount});
+            };
+
+            // Функция для определения победителя
+            document.getElementById('winnerButton').onclick = async function() {
+                const roomId = parseInt(document.getElementById('roomIdInput').value);
+                const winnerAddress = await contract.methods.seeWinner(roomId).call();
+                if (winnerAddress === '0x0000000000000000000000000000000000000000') {
+                    alert('It\'s a draw!');
+                } else {
+                    alert('The winner is: ' + winnerAddress);
+                }
+            };
+        };
+    </script>
+</head>
+<body>
+    <h1>Rock Paper Scissors Game</h1>
+    <label for="roomIdInput">Room ID:</label>
+    <input type="text" id="roomIdInput" />
+    <br>
+    <button id="openRoomButton">Open Room</button>
+    <button id="joinRoomButton">Join Room</button>
+    <br><br>
+    <h2>Player 1</h2>
+    <label for="move1Input">Move:</label>
+    <input type="text" id="move1Input" />
+    <button id="move1Button">Submit Move</button>
+    <br>
+    <label for="decode1Input">Decryption Seed:</label>
+    <input type="text" id="decode1Input" />
+    <button id="decode1Button">Decrypt Move</button>
+    <br><br>
+    <h2>Player 2</h2>
+    <label for="move2Input">Move:</label>
+    <input type="text" id="move2Input" />
+    <button id="move2Button">Submit Move</button>
+    <br>
+    <label for="decode2Input">Decryption Seed:</label>
+    <input type="text" id="decode2Input" />
+    <button id="decode2Button">Decrypt Move</button>
+    <br><br>
+    <button id="winnerButton">See Winner</button>
+    <!-- Добавьте другие элементы управления и логику для взаимодействия с контрактом -->
+</body>
 </html>
