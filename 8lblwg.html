@@ -1,0 +1,159 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Rock Paper Scissors Game</title> 
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script> 
+    <script> 
+        window.onload = async function() { 
+            if (window.ethereum) { 
+                window.web3 = new Web3(window.ethereum); 
+                await window.ethereum.enable(); 
+            } else if (window.web3) { 
+                window.web3 = new Web3(window.web3.currentProvider); 
+            } else { 
+                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!'); 
+                return; 
+            } 
+ 
+            const contractAddress = '0x9680778429290C1800F4A424070A04A805f2b649'; 
+            const abi = [
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "seed1",
+                "type": "string"
+            }
+        ],
+        "name": "decodeHash1",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "seed2",
+                "type": "string"
+            }
+        ],
+        "name": "decodeHash2",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "joinPlayer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "hash1",
+                "type": "bytes32"
+            }
+        ],
+        "name": "movePlayer1",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "hash2",
+                "type": "bytes32"
+            }
+        ],
+        "name": "movePlayer2",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "roomOpen",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            }
+        ],
+        "name": "seeWinner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]; 
+ 
+            const contract = new web3.eth.Contract(abi, contractAddress); 
+ 
+            // Пример вызова метода смарт-контракта 
+            document.getElementById('openRoomButton').onclick = async function() { 
+                const roomId = parseInt(document.getElementById('roomIdInput').value); 
+                await contract.methods.roomOpen(roomId).send({from: web3.eth.defaultAccount}); 
+                alert('Room opened successfully!'); 
+            }; 
+        }; 
+    </script> 
+</head> 
+<body> 
+    <h1>Rock Paper Scissors Game</h1> 
+    <label for="roomIdInput">Room ID:</label> 
+    <input type="text" id="roomIdInput" /> 
+    <button id="openRoomButton">Open Room</button> 
+    <!-- Добавьте другие элементы управления и логику для взаимодействия с контрактом --> 
+</body> 
+</html>
